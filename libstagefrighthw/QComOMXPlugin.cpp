@@ -19,7 +19,6 @@
 #include <dlfcn.h>
 
 #include <media/stagefright/HardwareAPI.h>
-#include <media/stagefright/MediaDebug.h>
 
 namespace android {
 
@@ -37,7 +36,7 @@ QComOMXPlugin::QComOMXPlugin()
       mGetRolesOfComponentHandle(NULL) {
     if (mLibHandle != NULL) {
         mInit = (InitFunc)dlsym(mLibHandle, "OMX_Init");
-        mDeinit = (DeinitFunc)dlsym(mLibHandle, "OMX_DeInit");
+        mDeinit = (DeinitFunc)dlsym(mLibHandle, "OMX_Deinit");
 
         mComponentNameEnum =
             (ComponentNameEnumFunc)dlsym(mLibHandle, "OMX_ComponentNameEnum");
@@ -124,8 +123,13 @@ OMX_ERRORTYPE QComOMXPlugin::getRolesOfComponent(
         err = (*mGetRolesOfComponentHandle)(
                 const_cast<OMX_STRING>(name), &numRoles2, array);
 
-        CHECK_EQ(err, OMX_ErrorNone);
-        CHECK_EQ(numRoles, numRoles2);
+	if (err != OMX_ErrorNone) {
+	  return err;
+	}
+
+	if (numRoles2 != numRoles) {
+	  return err;
+	}
 
         for (OMX_U32 i = 0; i < numRoles; ++i) {
             String8 s((const char *)array[i]);
