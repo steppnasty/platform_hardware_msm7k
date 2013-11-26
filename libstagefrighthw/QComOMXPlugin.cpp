@@ -18,7 +18,7 @@
 
 #include <dlfcn.h>
 
-#include <media/stagefright/HardwareAPI.h>
+#include <media/hardware/HardwareAPI.h>
 
 namespace android {
 
